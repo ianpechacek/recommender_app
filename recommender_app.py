@@ -37,10 +37,11 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
         # Run the Kaggle CLI command to download the dataset
         subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
         st.success("Dataset downloaded successfully!")
+        print('Current cwd: ',os.getcwd())
         st.session_state.books_dataset = True
     else:
         st.info("Dataset already exists. Skipping download.")
-        print('Current cwd: ',os.getcwd())
+        
 
     # if 'zip_file' not in st.session_state:
     #     # Open and read the zip file into memory
