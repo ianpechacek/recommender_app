@@ -1,6 +1,7 @@
-streamlit
-pandas
-numpy
-fuzzywuzzy
-sklearn.metrics.pairwise
-sklearn.neighbors
+streamlit==1.39.0
+streamlit-aggrid==1.0.5
+streamlit-autorefresh==1.0.1
+pandas==2.2.0
+numpy==1.26.4
+fuzzywuzzy==0.18.0
+scikit-learn==1.4.1
