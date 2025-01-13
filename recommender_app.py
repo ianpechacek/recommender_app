@@ -51,6 +51,7 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
 
 
 def load_data(path_rating, paths_books):
+    print(path_rating, paths_books)
     ratings = pd.read_csv(path_rating)
     books = pd.read_csv(paths_books)
     dataset = pd.merge(ratings, books, on=['ISBN'])
