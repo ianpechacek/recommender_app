@@ -40,6 +40,7 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
         st.session_state.books_dataset = True
     else:
         st.info("Dataset already exists. Skipping download.")
+        print('Current cwd: ',os.getcwd())
 
     # if 'zip_file' not in st.session_state:
     #     # Open and read the zip file into memory
