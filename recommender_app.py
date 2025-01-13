@@ -37,11 +37,11 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
     if not os.path.exists(zip_path):
         st.info("Downloading dataset from Kaggle...")
         # Run the Kaggle CLI command to download the dataset
-        subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
+        # subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
         st.success("Dataset downloaded successfully!")
-        st.write('Current cwd: ',os.getcwd())
-        st.write('Current Files: ',os.listdir(os.getcwd()))
-        st.session_state.books_dataset = True
+        # st.write('Current cwd: ',os.getcwd())
+        # st.write('Current Files: ',os.listdir(os.getcwd()))
+        st.session_state.books_dataset = load_data(path_rating, paths_books)
     else:
         st.info("Dataset already exists. Skipping download.")
         
@@ -254,7 +254,7 @@ if 'selected_book' in st.session_state:
 
 
 
-# st.session_state
+st.session_state
 
 
 
