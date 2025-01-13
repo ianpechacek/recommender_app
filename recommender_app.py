@@ -41,7 +41,7 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
         st.success("Dataset downloaded successfully!")
         # st.write('Current cwd: ',os.getcwd())
         # st.write('Current Files: ',os.listdir(os.getcwd()))
-        st.session_state.books_dataset = load_data(path_rating, paths_books)
+        st.session_state.dataset = load_data(path_rating, paths_books)
     else:
         st.info("Dataset already exists. Skipping download.")
         
@@ -142,7 +142,7 @@ def load_data_callback():
         with st.spinner('Looking up your book'):
             if st.session_state.text_input:
                 st.session_state.target_name=st.session_state.text_input
-            st.session_state.dataset = load_data(path_rating, paths_books)
+            # st.session_state.dataset = load_data(path_rating, paths_books)
             null_values_drop(st.session_state.dataset)
             st.session_state.matches, st.session_state.users = search_similar_names(st.session_state.dataset, record_column, user_column, st.session_state.target_name)
         st.success("Done!")
@@ -170,7 +170,7 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded")
 
-if 'books_dataset' not in st.session_state:
+if 'dataset' not in st.session_state:
     download_dataset_from_kaggle(dataset_name, zip_path)
 
 
