@@ -1,0 +1,6 @@
+streamlit
+pandas
+numpy
+fuzzywuzzy
+sklearn.metrics.pairwise
+sklearn.neighbors
