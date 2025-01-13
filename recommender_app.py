@@ -22,8 +22,10 @@ zip_path = 'book-recommendation-dataset.zip'
 
 # path_rating = 'kaggle/Ratings.csv'
 # paths_books = 'kaggle/Books.csv'
-path_rating = os.path.join(os.getcwd(),'Ratings.csv')
-paths_books = os.path.join(os.getcwd(),'Books.csv')
+# path_rating = os.path.join(os.getcwd(),'Ratings.csv')
+# paths_books = os.path.join(os.getcwd(),'Books.csv')
+path_rating = 'Ratings.csv'
+paths_books = 'Books.csv'
 
     
 record_column = 'Book-Title'
@@ -54,7 +56,7 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
 
 
 def load_data(path_rating, paths_books):
-    print('Data CWD location: ', path_rating, paths_books)
+    # print('Data CWD location: ', path_rating, paths_books)
     ratings = pd.read_csv(path_rating, low_memory=False)
     books = pd.read_csv(paths_books, low_memory=False)
     dataset = pd.merge(ratings, books, on=['ISBN'])
