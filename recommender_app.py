@@ -22,8 +22,8 @@ zip_path = 'book-recommendation-dataset.zip'
 
 # path_rating = 'kaggle/Ratings.csv'
 # paths_books = 'kaggle/Books.csv'
-path_rating = 'Ratings.csv'
-paths_books = 'Books.csv'
+path_rating = os.path.join(os.getcwd(),'Ratings.csv')
+paths_books = os.path.join(os.getcwd(),'Books.csv')
 
     
 record_column = 'Book-Title'
