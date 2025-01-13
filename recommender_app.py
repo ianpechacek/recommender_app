@@ -37,7 +37,7 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
     if not os.path.exists(zip_path):
         st.info("Downloading dataset from Kaggle...")
         # Run the Kaggle CLI command to download the dataset
-        # subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
+        subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
         st.success("Dataset downloaded successfully!")
         # st.write('Current cwd: ',os.getcwd())
         # st.write('Current Files: ',os.listdir(os.getcwd()))
