@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+# import opendatasets as od
+import subprocess
+import os
+# import zipfile
 
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
@@ -8,18 +12,43 @@ from fuzzywuzzy import process
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.neighbors import NearestNeighbors
 
+# user = st.secrets["user"]
+# key = st.secrets["key"]
 
-path_rating = 'kaggle/Ratings.csv'
-paths_books = 'kaggle/Books.csv'
+dataset_name = "arashnic/book-recommendation-dataset"
+zip_path = 'book-recommendation-dataset.zip'
 
-# target_name = "J.R.R. Tolkien"
-# target_name = "fellowship of the ring"
 
-# if st.session_state.ratings_matrix not
+
+# path_rating = 'kaggle/Ratings.csv'
+# paths_books = 'kaggle/Books.csv'
+path_rating = 'Ratings.csv'
+paths_books = 'Books.csv'
+
     
 record_column = 'Book-Title'
 user_column = 'User-ID'
 ratings_count_threshold = 8
+
+def download_dataset_from_kaggle(dataset_name, zip_path):
+    # Check if the dataset already exists
+    if not os.path.exists(zip_path):
+        st.info("Downloading dataset from Kaggle...")
+        # Run the Kaggle CLI command to download the dataset
+        subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
+        st.success("Dataset downloaded successfully!")
+        st.session_state.books_dataset = True
+    else:
+        st.info("Dataset already exists. Skipping download.")
+
+    # if 'zip_file' not in st.session_state:
+    #     # Open and read the zip file into memory
+    #     with open(zip_path, 'rb') as f:
+    #         file_content = f.read()  # Read the content of the zip file into memory
+        
+    #     # Store the file content in session state
+    #     st.session_state.zip_file = file_content
+
 
 def load_data(path_rating, paths_books):
     ratings = pd.read_csv(path_rating)
@@ -134,6 +163,10 @@ st.set_page_config(
     page_icon=" 📚",
     layout="wide",
     initial_sidebar_state="expanded")
+
+if 'books_dataset' not in st.session_state:
+    download_dataset_from_kaggle(dataset_name, zip_path)
+
 
 with st.sidebar:
     st.title('📚 Book Recommender')
