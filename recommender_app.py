@@ -6,8 +6,9 @@ import subprocess
 import os
 # import zipfile
 
-from fuzzywuzzy import fuzz
-from fuzzywuzzy import process
+# from fuzzywuzzy import fuzz
+# from fuzzywuzzy import process
+from rapidfuzz import process, fuzz
 
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.neighbors import NearestNeighbors
@@ -68,7 +69,7 @@ def null_values_drop(df):
         print(f'Column {column} has {nulls} null values')
     df.dropna(axis=1, how='any', inplace=True, subset=None)
 
-@st.cache_data
+# @st.cache_data
 def search_similar_names(df, record_column, user_column, target_name, threshold=90):
     matches = []
     user_ids = [] 
@@ -78,6 +79,20 @@ def search_similar_names(df, record_column, user_column, target_name, threshold=
             matches.append(record)
             user_ids.append(df[user_column].iloc[index])  # Get corresponding User-ID for the match
     return np.unique(np.array(matches)), np.unique(np.array(user_ids))
+
+def search_similar_names(df, record_column, user_column, target_name, threshold=80):
+    results = process.extract(
+        target_name,
+        df[record_column].dropna().unique(),
+        scorer=fuzz.partial_ratio,
+        score_cutoff=threshold
+    )
+    matches = [match[0] for match in results]
+    user_ids = [
+        df[df[record_column] == match[0]][user_column].values[0]
+        for match in results
+    ]
+    return np.unique(matches), np.unique(user_ids)
 
 
 def matrix_transform(dataset, users, ratings_count_threshold=8):
@@ -153,13 +168,13 @@ def run_model_callback():
         st.session_state.ratings_matrix = matrix_transform(st.session_state.dataset, st.session_state.users )
 
         # build cosine similarity matrix
-        cosine_similarity_matrix(st.session_state.ratings_matrix)
+        # cosine_similarity_matrix(st.session_state.ratings_matrix)
 
-        # build correlation matrix
-        correlation_matrix(st.session_state.ratings_matrix)
+        # # build correlation matrix
+        # correlation_matrix(st.session_state.ratings_matrix)
 
-        # build knn df
-        knn_matrix(st.session_state.ratings_matrix, st.session_state.selected_book)
+        # # build knn df
+        # knn_matrix(st.session_state.ratings_matrix, st.session_state.selected_book)
 
 # ==============================================================
 # STREAMLIT
@@ -186,70 +201,70 @@ with st.sidebar:
     if 'target_name' in st.session_state:
         selected_book = st.selectbox('Select the book: ', options=st.session_state.matches, on_change=run_model_callback, key='select_book')
                                  
-if 'selected_book' in st.session_state:
-    with st.sidebar:
-        st.write('Reload page for new search') 
+# if 'selected_book' in st.session_state:
+#     with st.sidebar:
+#         st.write('Reload page for new search') 
 
-    col1, col2 = st.columns(2, gap='medium')
-    with col1:
-        st.header('You might enjoy these books: ')
-        st.bar_chart(st.session_state.cosine_sim_df[selected_book]\
-        [st.session_state.cosine_sim_df[selected_book] < 1]
-        .sort_values(ascending=False)
-        .head(5)
-        ,horizontal=True, height=400) 
+#     col1, col2 = st.columns(2, gap='medium')
+#     with col1:
+#         st.header('You might enjoy these books: ')
+#         st.bar_chart(st.session_state.cosine_sim_df[selected_book]\
+#         [st.session_state.cosine_sim_df[selected_book] < 1]
+#         .sort_values(ascending=False)
+#         .head(5)
+#         ,horizontal=True, height=400) 
   
-    with col2:
-        st.header('You might dislike these books: ')
-        st.bar_chart(st.session_state.cosine_sim_df[selected_book]\
-        [st.session_state.cosine_sim_df[selected_book] > 0]
-        .sort_values(ascending=False)
-        .tail(5)
-        ,horizontal=True, height=400, color=[255,0,0])
+#     with col2:
+#         st.header('You might dislike these books: ')
+#         st.bar_chart(st.session_state.cosine_sim_df[selected_book]\
+#         [st.session_state.cosine_sim_df[selected_book] > 0]
+#         .sort_values(ascending=False)
+#         .tail(5)
+#         ,horizontal=True, height=400, color=[255,0,0])
 
-    st.markdown(
-    '<p style="text-align: center; color: grey; font-size: 20px;">Cosine similarity model</p>',
-    unsafe_allow_html=True
-    )
+#     st.markdown(
+#     '<p style="text-align: center; color: grey; font-size: 20px;">Cosine similarity model</p>',
+#     unsafe_allow_html=True
+#     )
     
 
-    col1, col2 = st.columns(2, gap='medium')
-    with col1:
-        st.header('You might enjoy these books: ')
-        st.bar_chart(st.session_state.corr_df[selected_book]\
-        [st.session_state.corr_df[selected_book] < 1]
-        .sort_values(ascending=False)
-        .head(5)
-        ,horizontal=True, height=400) 
+#     col1, col2 = st.columns(2, gap='medium')
+#     with col1:
+#         st.header('You might enjoy these books: ')
+#         st.bar_chart(st.session_state.corr_df[selected_book]\
+#         [st.session_state.corr_df[selected_book] < 1]
+#         .sort_values(ascending=False)
+#         .head(5)
+#         ,horizontal=True, height=400) 
   
-    with col2:
-        st.header('You might dislike these books: ')
-        st.bar_chart(st.session_state.corr_df[selected_book]\
-        [st.session_state.corr_df[selected_book] > -0.8]
-        .sort_values(ascending=False)
-        .tail(5)
-        ,horizontal=True, height=400, color=[255,0,0])
+#     with col2:
+#         st.header('You might dislike these books: ')
+#         st.bar_chart(st.session_state.corr_df[selected_book]\
+#         [st.session_state.corr_df[selected_book] > -0.8]
+#         .sort_values(ascending=False)
+#         .tail(5)
+#         ,horizontal=True, height=400, color=[255,0,0])
 
-    st.markdown(
-    '<p style="text-align: center; color: grey; font-size: 20px;">Correlation model</p>',
-    unsafe_allow_html=True
-    )
+#     st.markdown(
+#     '<p style="text-align: center; color: grey; font-size: 20px;">Correlation model</p>',
+#     unsafe_allow_html=True
+#     )
     
-    col1, col2 = st.columns(2, gap='medium')
-    with col1:
-        st.header('You might enjoy these books: ')
-        st.bar_chart(
-        data = st.session_state.knn_df[1:6],
-        x = 'title',
-        y = 'distance',
-        # .head(5)
-        horizontal=True, height=400) 
+#     col1, col2 = st.columns(2, gap='medium')
+#     with col1:
+#         st.header('You might enjoy these books: ')
+#         st.bar_chart(
+#         data = st.session_state.knn_df[1:6],
+#         x = 'title',
+#         y = 'distance',
+#         # .head(5)
+#         horizontal=True, height=400) 
   
 
-    st.markdown(
-    '<p style="text-align: center; color: grey; font-size: 20px;">KNN model</p>',
-    unsafe_allow_html=True
-    )
+#     st.markdown(
+#     '<p style="text-align: center; color: grey; font-size: 20px;">KNN model</p>',
+#     unsafe_allow_html=True
+#     )
 # ==============================================================
 
 
