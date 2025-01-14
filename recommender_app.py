@@ -68,7 +68,7 @@ def null_values_drop(df):
         print(f'Column {column} has {nulls} null values')
     df.dropna(axis=1, how='any', inplace=True, subset=None)
 
-
+@st.cache_data
 def search_similar_names(df, record_column, user_column, target_name, threshold=90):
     matches = []
     user_ids = [] 
@@ -255,6 +255,5 @@ if 'selected_book' in st.session_state:
 
 
 st.session_state
-
 
 
