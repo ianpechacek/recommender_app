@@ -1,33 +1,18 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-# import opendatasets as od
 import subprocess
 import os
-# import zipfile
-
-# from fuzzywuzzy import fuzz
-# from fuzzywuzzy import process
 from rapidfuzz import process, fuzz
 
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.neighbors import NearestNeighbors
 
-# user = st.secrets["user"]
-# key = st.secrets["key"]
-
 dataset_name = "arashnic/book-recommendation-dataset"
 zip_path = 'book-recommendation-dataset.zip'
 
-
-
-# path_rating = 'kaggle/Ratings.csv'
-# paths_books = 'kaggle/Books.csv'
-# path_rating = os.path.join(os.getcwd(),'Ratings.csv')
-# paths_books = os.path.join(os.getcwd(),'Books.csv')
 path_rating = 'Ratings.csv'
 paths_books = 'Books.csv'
-
     
 record_column = 'Book-Title'
 user_column = 'User-ID'
@@ -40,8 +25,6 @@ def download_dataset_from_kaggle(dataset_name, zip_path):
         # Run the Kaggle CLI command to download the dataset
         subprocess.run(['kaggle', 'datasets', 'download', '-d', dataset_name, '--unzip'], check=True)
         st.success("Dataset downloaded successfully!")
-        # st.write('Current cwd: ',os.getcwd())
-        # st.write('Current Files: ',os.listdir(os.getcwd()))
         st.session_state.dataset = load_data(path_rating, paths_books)
     else:
         st.info("Dataset already exists. Skipping download.")
@@ -68,12 +51,7 @@ def search_similar_names(df, record_column, user_column, target_name, threshold=
         score_cutoff=threshold
     )
     matches = [match[0] for match in results]
-    # user_ids = [
-    #     df[df[record_column] == match[0]][user_column].values[0]
-    #     for match in results
-    # ]
     return np.unique(matches)
-        #   np.unique(user_ids)
 
 def filter_users(df, record_column, user_column, target_name):
     users_id = df[df[record_column]==target_name][user_column].unique()
@@ -108,20 +86,17 @@ def correlation_matrix(ratings_matrix):
     corr_matrix = ratings_matrix.corr()
     st.session_state.corr_df = pd.DataFrame(
     np.round(corr_matrix,3), 
-    index=ratings_matrix.columns,  # Book IDs
-    columns=ratings_matrix.columns  # Book IDs
+    index=ratings_matrix.columns,  
+    columns=ratings_matrix.columns 
     )
 
 def knn_matrix(ratings_matrix, selected_book):
     model = NearestNeighbors(metric='cosine')
     model.fit(ratings_matrix.T.values)
     distance, indice = model.kneighbors(ratings_matrix.T.loc[selected_book].values.reshape(1,-1), n_neighbors=6)
-
-    # knn_df = ratings_matrix.corr()
     st.session_state.knn_df = pd.DataFrame({
     'title'   : ratings_matrix.T.iloc[indice[0]].index.values,
     'distance': distance[0]
-    # 'similarity': - np.log(distance[0])
     }) \
     .sort_values(by='distance', ascending=True)\
     .reset_index(drop=True)
@@ -141,7 +116,6 @@ def load_data_callback():
         with st.spinner('Looking up your book'):
             if st.session_state.text_input:
                 st.session_state.target_name=st.session_state.text_input
-            # st.session_state.dataset = load_data(path_rating, paths_books)
             null_values_drop(st.session_state.dataset)
             st.session_state.matches = search_similar_names(st.session_state.dataset, record_column, user_column, st.session_state.target_name)
         st.success("Done!")
@@ -152,6 +126,7 @@ def run_model_callback():
         st.session_state.users = filter_users(st.session_state.dataset, record_column, user_column, st.session_state.selected_book)
         st.session_state.ratings_matrix = matrix_transform(st.session_state.dataset, st.session_state.users )
         if len(st.session_state.ratings_matrix) > 1:
+
             # build cosine similarity matrix
             cosine_similarity_matrix(st.session_state.ratings_matrix)
 
@@ -160,7 +135,9 @@ def run_model_callback():
 
             # build knn df
             knn_matrix(st.session_state.ratings_matrix, st.session_state.selected_book)
+
         else:
+
             del st.session_state.ratings_matrix
             st.write('Not enough data to build a recommender model...Try a different edition or other book!')
 
@@ -183,8 +160,6 @@ with st.sidebar:
     target_name = st.text_input('What book have you read lately?',
                                 on_change=load_data_callback, key='text_input'
                                   )
-    # find = st.button('Find!', on_click=load_data_callback, args=target_name )
-
     
     if 'target_name' in st.session_state:
         selected_book = st.selectbox('Select the book: ', options=st.session_state.matches, on_change=run_model_callback, key='select_book')
@@ -256,5 +231,4 @@ if 'ratings_matrix' in st.session_state:
 # ==============================================================
 
 # st.session_state
-
 
