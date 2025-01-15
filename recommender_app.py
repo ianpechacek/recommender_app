@@ -63,6 +63,8 @@ def matrix_transform(dataset, users, ratings_count_threshold=8):
         .filter(lambda x: len(x) >= ratings_count_threshold) \
         ['Book-Title'] \
         .unique()
+    if len(books_to_compare) < 5:
+        print('Not enough books rated by readers of your selected book - cannot model recommendations')
     ratings_matrix = dataset[dataset['Book-Title'].isin(books_to_compare)\
                                                 & dataset['User-ID'].isin(users)] \
         .groupby(['User-ID', 'Book-Title'])['Book-Rating'] \
@@ -125,7 +127,20 @@ def run_model_callback():
         st.session_state.selected_book=st.session_state.select_book
         st.session_state.users = filter_users(st.session_state.dataset, record_column, user_column, st.session_state.selected_book)
         st.session_state.ratings_matrix = matrix_transform(st.session_state.dataset, st.session_state.users )
-        if len(st.session_state.ratings_matrix) > 1:
+
+        if len(st.session_state.ratings_matrix) <= 1:
+
+            st.write('Not enough readers of the selected book...Are you sure you read this book? Try a different edition or other book!')
+            if 'models_built' in st.session_state:
+                del st.session_state.models_built
+        
+        elif len(st.session_state.ratings_matrix.columns) < 5:
+
+            st.write('Not enough books rated by readers of your selected book - cannot model recommendations...')
+            if 'models_built' in st.session_state:
+                del st.session_state.models_built
+
+        else:
 
             # build cosine similarity matrix
             cosine_similarity_matrix(st.session_state.ratings_matrix)
@@ -136,10 +151,9 @@ def run_model_callback():
             # build knn df
             knn_matrix(st.session_state.ratings_matrix, st.session_state.selected_book)
 
-        else:
+            st.session_state.models_built = True
 
-            del st.session_state.ratings_matrix
-            st.write('Not enough data to build a recommender model...Try a different edition or other book!')
+            
 
 # ==============================================================
 # STREAMLIT
@@ -164,7 +178,8 @@ with st.sidebar:
     if 'target_name' in st.session_state:
         selected_book = st.selectbox('Select the book: ', options=st.session_state.matches, on_change=run_model_callback, key='select_book')
                                  
-if 'ratings_matrix' in st.session_state:
+if 'models_built' in st.session_state:
+# if st.session_state.models_built==True:
     with st.sidebar:
         st.write('Reload page for new search') 
 
@@ -231,4 +246,3 @@ if 'ratings_matrix' in st.session_state:
 # ==============================================================
 
 # st.session_state
-
